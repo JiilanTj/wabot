@@ -16,7 +16,7 @@ if (isset($_POST['submit']) && isset($_FILES['participants_file'])) {
             "participants" => $participants
         );
 
-        $url = 'http://localhost:3000/create-group';
+        $url = 'http://localhost:3000/add-members';
         $options = array(
             'http' => array(
                 'header'  => "Content-type: application/json\r\n",
@@ -26,15 +26,22 @@ if (isset($_POST['submit']) && isset($_FILES['participants_file'])) {
         );
         $context  = stream_context_create($options);
         $result = file_get_contents($url, false, $context);
+
         if ($result === FALSE) {
-            echo "<script>alert('Gagal membuat grup'); window.location.href='form_create_group.php'</script>";
+            echo "<script>alert('Gagal menambah anggota ke grup'); window.location.href='form_add_members.php'</script>";
         } else {
-            echo "<script>alert('Berhasil membuat grup'); window.location.href='form_create_group.php'</script>";
+            $response = json_decode($result);
+            if ($response && isset($response->status) && $response->status === 'success') {
+                echo "<script>alert('Berhasil menambah anggota ke grup'); window.location.href='form_add_members.php'</script>";
+            } else {
+                $error_message = isset($response->error) ? $response->error : 'Gagal menambah anggota ke grup';
+                echo "<script>alert('$error_message'); window.location.href='form_add_members.php'</script>";
+            }
         }
     } else {
-        echo "<script>alert('File JSON tidak valid'); window.location.href='form_create_group.php'</script>";
+        echo "<script>alert('File JSON tidak valid'); window.location.href='form_add_members.php'</script>";
     }
 } else {
-    header('location: form_create_group.php');
+    header('location: form_add_members.php');
 }
 ?>
